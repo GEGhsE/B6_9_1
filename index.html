@@ -1271,7 +1271,7 @@
         }
         return {
           success: true,
-          userInfo: { num: String(n), name: '학생' + n, grade: cls.split('-')[0] || '5', gender: (n % 2 ? '남' : '여'), classRoom: cls },
+          userInfo: { num: String(n), name: '학생' + n, grade: cls.split('-')[0] || '5', gender: (n % 2 ? '남' : '여'), classRoom: cls, totalMinutes: Number(_demoGet('mins:' + cls + ':' + n, 0)) || 0 },
           papsRecord: _demoGet('paps:' + cls + ':' + n, {}),
           myLogs: _demoGet('logs:' + cls + ':' + n, []),
           goals: _demoGet('goals:' + cls + ':' + n, []),
@@ -2170,10 +2170,16 @@ ${ballSvg(87,11,8.5)}</svg>`,
       .withSuccessHandler(res => {
         hideSpin();
         if (!res.success) { document.getElementById('login-err').textContent = res.error; return; }
-        user = res.userInfo;
-        papsRec = res.papsRecord;       // [수정] skillRecord → papsRecord
+        user = res.userInfo || {};
+        // 서버·체험 응답에 값이 빠져 있어도 화면이 멈추지 않도록 기본값을 채운다.
+        if (user.totalMinutes === undefined || user.totalMinutes === null || isNaN(Number(user.totalMinutes))) user.totalMinutes = 0;
+        else user.totalMinutes = Number(user.totalMinutes);
+        if (!user.name) user.name = '학생';
+        if (!user.grade) user.grade = '5';
+        if (!user.gender) user.gender = '남';
+        papsRec = res.papsRecord || {};   // [수정] skillRecord → papsRecord
         PAPS_STANDARDS = res.papsStandards || {}; // [수정] 백엔드 기준표 사용 (데모 모드 대비 안전 기본값)
-        user.myLogs   = res.myLogs;
+        user.myLogs   = res.myLogs || [];
         user.goals    = res.goals || [];
         user.weeklyMins  = res.weeklyMins  || Array(6).fill(0);
         user.streakDays  = res.streakDays  || 0;
@@ -2530,7 +2536,7 @@ ${ballSvg(87,11,8.5)}</svg>`,
     const statMin  = document.getElementById('stat-min');
     const statTier = document.getElementById('stat-tier');
     const statIco  = document.getElementById('stat-ico');
-    if (statMin)  statMin.textContent  = user.totalMinutes.toFixed(1);
+    if (statMin)  statMin.textContent  = (Number(user.totalMinutes) || 0).toFixed(1);
     // 측정 완료 종목 수
     const measuredCount = PAPS_KEYS.filter(k => papsRec[k] !== null && papsRec[k] !== undefined).length;
     const statMeasured = document.getElementById('stat-measured-count');
@@ -4792,7 +4798,6 @@ ${ballSvg(87,11,8.5)}</svg>`,
 })();
 </script>
 
-<!-- ── 교사 관리 화면 (같은 파일 안에 담아 링크 하나로 쓴다) ── -->
 <div id="teacher-console" style="display:none; position:fixed; inset:0; z-index:100000; background:#fff;">
   <div style="position:absolute; top:0; left:0; right:0; height:46px; background:#1e293b; color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:14px; z-index:2;">
     <span style="font-weight:700;">📊 교사 관리 화면</span>
