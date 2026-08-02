@@ -253,7 +253,7 @@
     <div id="pw-group" style="display:none; margin-bottom:14px;">
       <label class="form-label">🔑 비밀번호</label>
       <input class="form-input" id="pw-input" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()" />
-      <div id="demo-pw-hint" style="display:none; margin-top:6px; font-size:12.5px; color:#8a6d1a; background:#fff7e0; border:1px solid #f0dca0; border-radius:8px; padding:7px 10px;">체험 모드 비밀번호는 <b>1111</b> 이에요.</div>
+      <div id="demo-pw-hint" style="display:none; margin-top:8px; font-size:12.5px; color:#8a6d1a; background:#fff7e0; border:1px solid #f0dca0; border-radius:8px; padding:8px 10px; line-height:1.5;">💡 웹앱 초기 학생 비밀번호는 1111, 교수자 비밀번호는 1234로 설정되어 있습니다.</div>
     </div>
     <div id="login-err" style="color:#ef4444; font-size:13px; min-height:20px; margin-bottom:8px;"></div>
     <button id="login-btn" onclick="doLogin()" disabled
@@ -4838,6 +4838,28 @@ ${ballSvg(87,11,8.5)}</svg>`,
     document.body.classList.add('has-demo-bar');
   }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', show); } else { show(); }
+})();
+</script>
+
+<script>
+(function () {
+  function isDemoLS() {
+    try {
+      if (/[#&]c=/.test(location.hash || '')) return false;
+      for (var j = 0; j < localStorage.length; j++) {
+        var k = localStorage.key(j) || '';
+        if (/exec|gasurl|serverurl|sheet_api|gas_exec|appserverurl|endpoint/i.test(k) && localStorage.getItem(k)) return false;
+      }
+      return true;
+    } catch (e) { return true; }
+  }
+  function show() {
+    if (!isDemoLS()) return;
+    var el = document.getElementById('demo-pw-hint');
+    if (el) el.style.display = 'block';
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(show, 500); });
+  else setTimeout(show, 500);
 })();
 </script>
 </body>
